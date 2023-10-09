@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,300,100">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/1.3.2/css/weather-icons.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            height: 100vh;
+        }
+
+.container {
+    text-align: center;
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.1);
+    width: 80%;
+    max-width: 400px;
+    margin-top: 20px; /* Add margin-top to push the container down from the top */
+}
+
+/* Rest of your CSS remains unchanged */
+
+
+h1 {
+    color: #333;
+}
+
+#location-input {
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+    width: calc(50% - 22px);
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #4c99af;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#weather-info {
+    margin-top: 20px;
+    font-size: 18px;
+    color: #333;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .container {
+        /* width: 80%; */
+        border: 5px solid;
+  margin: auto;
+  width: 50%;
+  padding: 10px;
+  text-align: center;
+    }
+}
+
+
+    </style>
+    <title>Weather App</title>
+</head>
+
+<body>
+    <div class="wrapper">
+        <h1>Weather App</h1>
+        <div class="container">
+            <input type="text" class="searchbar" id="location-input" placeholder="Enter location">
+ 
+            <button class="button" onclick="getWeather()">Get Weather</button>
+        </div>
+        <div class="weather">
+            <div class="panel" id="weather-info"></div>
+        </div>
+    </div>
+    <script>
+        // Update the JavaScript code to match the correct element ID
+        function getWeather() {
+    var locationInput = document.getElementById('location-input');
+    var location = locationInput.value;
+    if (location === 'Current Location') {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(function(position) {
+                // Get latitude and longitude
+                var latitude = position.coords.latitude;
+                var longitude = position.coords.longitude;
+
+                // Use latitude and longitude to get location name (reverse geocoding)
+                // You can make an additional API request to get the location name based on latitude and longitude
+
+                // Call the backend API with latitude and longitude
+                fetch(`/get_weather/?latitude=${latitude}&longitude=${longitude}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        updateWeatherInfo(data, 'Current Location');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        updateWeatherInfo(null, 'Current Location');
+                    });
+            }, function(error) {
+                console.error('Error getting geolocation:', error);
+                updateWeatherInfo(null, 'Current Location');
+            });
+        } else {
+            console.error('Geolocation is not supported by this browser.');
+            updateWeatherInfo(null, 'Current Location');
+        }
+    } else {
+        // Call the backend API with the input location
+        fetch(`/get_weather/?location=${location}`)
+            .then(response => response.json())
+            .then(data => {
+                updateWeatherInfo(data, location);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                updateWeatherInfo(null, location);
+            });
+    }
+}
+
+function updateWeatherInfo(data, location) {
+    var weatherInfoDiv = document.getElementById('weather-info');
+    if (data) {
+        weatherInfoDiv.innerHTML = `<h2>${location}</h2>
+                                    <p>Temperature: ${data.temperature}°C</p>
+                                    <p>Conditions: ${data.conditions}</p>
+                                    <p>Wind: ${data.wind} Kph</p>
+                                    <p>Humidity: ${data.humidity}%</p>
+                                    <p>Precipitation: ${data.precip_in}%</p>`;
+    } else {
+        weatherInfoDiv.innerHTML = `<h2>${location}</h2>
+                                    <p>Error fetching weather data.</p>`;
+    }
+}
+
+    </script>
+</body>
+
+</html>
